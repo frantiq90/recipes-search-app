@@ -1,25 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import Header from './components/Header';
+import SearchBar from './components/SearchBar';
+import RecipeList from './components/RecipeList';
+import { fetchRecipes } from './api';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 
-function App() {
+const App = () => {
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSearch = async (query) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const results = await fetchRecipes(query);
+      setRecipes(results);
+    } catch (err) {
+      setError('Failed to fetch recipes');
+    }
+    setLoading(false);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Header />
+      <SearchBar onSearch={handleSearch} />
+      {loading ? (
+        <Box display="flex" justifyContent="center" marginTop={2}>
+        <CircularProgress />
+        </Box>
+      ) : error ? (
+        <p>{error}</p>
+      ) : (
+        <RecipeList recipes={recipes} />
+      )}
     </div>
   );
-}
+};
 
 export default App;
